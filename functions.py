@@ -6,7 +6,8 @@ import requests
 
 
 account_id = '112578893942190553010'
-
+start_date = '2021-01-01'
+end_date = '2021-01-02'
 
 def get_token():
     # If modifying these scopes, delete the file token.json.
@@ -50,14 +51,12 @@ def get_locations_list():
 
 
 def get_location_metrics():
+    res = []
+    for location_id in get_locations_list():
         my_headers = {'Authorization': 'Bearer {0}'.format(get_token())}
-
-        response = requests.post(
-            'https://mybusiness.googleapis.com/v4/accounts/112578893942190553010/locations:reportInsights',
-            headers=my_headers,
-            json={
+        my_json = {
                 "locationNames": [
-                    "accounts/112578893942190553010/locations/176777221452884234"
+                    "accounts/112578893942190553010/locations/" + location_id
                 ],
                 "basicRequest": {
                     "metricRequests": [
@@ -69,11 +68,18 @@ def get_location_metrics():
                         },
                     ],
                     "timeRange": {
-                        "startTime": "2020-10-12T01:01:23.045123456Z",
-                        "endTime": "2021-01-10T23:59:59.045123456Z"
+                        "startTime": start_date + "T01:01:23.045123456Z",   #format : AAAA-MM-JJ (2020-10-12)
+                        "endTime": end_date + "T23:59:59.045123456Z"        #format : AAAA-MM-JJ (2021-01-10)
                     }
                 }
-            })
+            }
 
-        return response.json()
+        response = requests.post(
+            'https://mybusiness.googleapis.com/v4/accounts/112578893942190553010/locations:reportInsights',
+            headers=my_headers,
+            json=my_json)
+
+        res.append(response.json())
+
+    return res
 

@@ -12,9 +12,9 @@ import pandas as pd
 def main():
     df = pd.DataFrame(columns=['DATE', 'LOCATION_ID', 'METRIC', 'VALUE'])
 
-    for location in get_location_metrics()['locationMetrics']:
-        x, y, z, location_id = location['locationName'].split('/')
-        for metric in location['metricValues']:
+    for location in get_location_metrics():
+        x, y, z, location_id = location['locationMetrics'][0]['locationName'].split('/')
+        for metric in location['locationMetrics'][0]['metricValues']:
             for date in metric['dimensionalValues']:
                 try:
                     row = {
@@ -31,3 +31,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    #print(get_location_metrics())
