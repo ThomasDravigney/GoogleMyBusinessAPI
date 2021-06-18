@@ -9,10 +9,13 @@ from functions import get_location_metrics, save_local_data, get_local_data, cle
 
 
 def main():
-    #save_local_data(get_location_metrics())
-    data = get_local_data()
-
-    print(create_dataframe(data))
+    try:
+        data = get_local_data()
+        df = create_dataframe(data)
+        print(df)
+    except (FileNotFoundError, UnboundLocalError):
+        save_local_data(get_location_metrics())
+        print('local_data file has been created. Rerun to get expected result.')
 
 
 if __name__ == '__main__':
