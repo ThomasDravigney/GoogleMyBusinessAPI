@@ -1,13 +1,16 @@
 import os.path
+import pickle
+import requests
+import pandas as pd
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-import requests
 
 
 account_id = '112578893942190553010'
 start_date = '2021-01-01'
 end_date = '2021-01-02'
+
 
 def get_token():
     # If modifying these scopes, delete the file token.json.
@@ -68,8 +71,8 @@ def get_location_metrics():
                         },
                     ],
                     "timeRange": {
-                        "startTime": start_date + "T01:01:23.045123456Z",   #format : AAAA-MM-JJ (2020-10-12)
-                        "endTime": end_date + "T23:59:59.045123456Z"        #format : AAAA-MM-JJ (2021-01-10)
+                        "startTime": start_date + "T01:01:23.045123456Z",   #format : AAAA-MM-JJ
+                        "endTime": end_date + "T23:59:59.045123456Z"        #format : AAAA-MM-JJ
                     }
                 }
             }
@@ -82,4 +85,44 @@ def get_location_metrics():
         res.append(response.json())
 
     return res
+
+
+def save_local_data(data):
+    with open('local_data', 'wb') as file:
+        my_pickler = pickle.Pickler(file)
+        my_pickler.dump(data)
+
+
+def get_local_data():
+    with open('local_data', 'rb') as file:
+        my_unpickler = pickle.Unpickler(file)
+        local_data = my_unpickler.load()
+
+    return local_data
+
+
+def clear_local_data():
+    with open('local_data', 'wb') as file:
+        my_pickler = pickle.Pickler(file)
+        my_pickler.dump([])
+
+
+def create_dataframe(data):     #data from get_location_metrics()
+    df = pd.DataFrame(columns=['DATE', 'LOCATION_ID', 'METRIC', 'VALUE'])
+
+    for location in data:
+        x, y, z, location_id = location['locationMetrics'][0]['locationName'].split('/')
+        for metric in location['locationMetrics'][0]['metricValues']:
+            for date in metric['dimensionalValues']:
+                try:
+                    row = {
+                        'DATE': date['timeDimension']['timeRange']['startTime'],
+                        'LOCATION_ID': location_id,
+                        'METRIC': metric['metric'],
+                        'VALUE': date['value']}
+                    df = df.append(row, ignore_index=True)
+                except KeyError:
+                    pass
+
+    return df
 

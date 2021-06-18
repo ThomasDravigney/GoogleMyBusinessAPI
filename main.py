@@ -5,30 +5,15 @@
 # Google My Business, location metrics : https://developers.google.com/my-business/reference/rest/v4/Metric?hl=fr
 
 
-from functions import get_location_metrics
-import pandas as pd
+from functions import get_location_metrics, save_local_data, get_local_data, clear_local_data, create_dataframe
 
 
 def main():
-    df = pd.DataFrame(columns=['DATE', 'LOCATION_ID', 'METRIC', 'VALUE'])
+    #save_local_data(get_location_metrics())
+    data = get_local_data()
 
-    for location in get_location_metrics():
-        x, y, z, location_id = location['locationMetrics'][0]['locationName'].split('/')
-        for metric in location['locationMetrics'][0]['metricValues']:
-            for date in metric['dimensionalValues']:
-                try:
-                    row = {
-                        'DATE': date['timeDimension']['timeRange']['startTime'],
-                        'LOCATION_ID': location_id,
-                        'METRIC': metric['metric'],
-                        'VALUE': date['value']}
-                    df = df.append(row, ignore_index=True)
-                except KeyError:
-                    pass
-
-    print(df)
+    print(create_dataframe(data))
 
 
 if __name__ == '__main__':
     main()
-    #print(get_location_metrics())
