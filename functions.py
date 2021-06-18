@@ -71,8 +71,8 @@ def get_location_metrics():
                         },
                     ],
                     "timeRange": {
-                        "startTime": start_date + "T01:01:23.045123456Z",   #format : AAAA-MM-JJ
-                        "endTime": end_date + "T23:59:59.045123456Z"        #format : AAAA-MM-JJ
+                        "startTime": start_date + "T01:01:23.045123456Z",   # format : AAAA-MM-JJ
+                        "endTime": end_date + "T23:59:59.045123456Z"        # format : AAAA-MM-JJ
                     }
                 }
             }
@@ -107,7 +107,7 @@ def clear_local_data():
         my_pickler.dump([])
 
 
-def create_dataframe(data):     #data from get_location_metrics()
+def create_dataframe(data):     # data from get_location_metrics()
     df = pd.DataFrame(columns=['DATE', 'LOCATION_ID', 'METRIC', 'VALUE'])
 
     for location in data:
