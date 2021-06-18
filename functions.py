@@ -120,18 +120,21 @@ def create_dataframe(data):     # data from get_location_metrics()
     df = pd.DataFrame(columns=['DATE', 'LOCATION_ID', 'METRIC', 'VALUE'])
 
     for location in data:
-        x, y, z, location_id = location['locationMetrics'][0]['locationName'].split('/')
-        for metric in location['locationMetrics'][0]['metricValues']:
-            for date in metric['dimensionalValues']:
-                try:
-                    row = {
-                        'DATE': date['timeDimension']['timeRange']['startTime'],
-                        'LOCATION_ID': location_id,
-                        'METRIC': metric['metric'],
-                        'VALUE': date['value']}
-                    df = df.append(row, ignore_index=True)
-                except KeyError:
-                    pass
+        try:
+            location_id = location['locationMetrics'][0]['locationName'].split('/')[-1]
+            for metric in location['locationMetrics'][0]['metricValues']:
+                for date in metric['dimensionalValues']:
+                    try:
+                        row = {
+                            'DATE': date['timeDimension']['timeRange']['startTime'],
+                            'LOCATION_ID': location_id,
+                            'METRIC': metric['metric'],
+                            'VALUE': date['value']}
+                        df = df.append(row, ignore_index=True)
+                    except KeyError:
+                        pass
+        except KeyError:
+            pass
 
     return df
 

@@ -17,11 +17,8 @@ def main():
         save_local_data(get_location_metrics())
         print('local_data file has been created. Rerun to get expected result.')
 
-    #   df.to_csv(r'data gmb.csv', index=False)
+    df.to_csv(r'C:\Users\dravi\Downloads\data gmb.csv', index=False)
 
 
 if __name__ == '__main__':
-    #main()
-    print(get_locations_list())
-    print(len(get_locations_list()))
-
+    main()
