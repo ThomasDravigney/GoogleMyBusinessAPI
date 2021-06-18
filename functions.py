@@ -38,17 +38,26 @@ def get_token():
 
 
 def get_locations_list():
-    my_headers = {'Authorization': 'Bearer {0}'.format(get_token())}
-    query = {'orderBy': 'storeCode'}
-
-    response = requests.get('https://mybusiness.googleapis.com/v4/accounts/{0}/locations'.format(account_id),
-                            headers=my_headers,
-                            params=query)
-
     locations_list = []
-    for row in response.json()['locations']:
-        x, y, z, location_id = row['name'].split('/')
-        locations_list.append(location_id)
+    page_token = None
+
+    while page_token != '':
+        my_headers = {'Authorization': 'Bearer {0}'.format(get_token())}
+        query = {'orderBy': 'storeCode',
+                 'pageToken': page_token}
+
+        response = requests.get('https://mybusiness.googleapis.com/v4/accounts/{0}/locations'.format(account_id),
+                                headers=my_headers,
+                                params=query)
+
+        for row in response.json()['locations']:
+            x, y, z, location_id = row['name'].split('/')
+            locations_list.append(location_id)
+
+        try:
+            page_token = response.json()['nextPageToken']
+        except KeyError:
+            page_token = ''
 
     return locations_list
 
