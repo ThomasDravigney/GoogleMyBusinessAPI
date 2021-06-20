@@ -1,3 +1,4 @@
+from time import time
 import os.path
 import pickle
 import requests
@@ -8,8 +9,18 @@ from google.oauth2.credentials import Credentials
 
 
 account_id = '112578893942190553010'
-start_date = '2021-01-01'
-end_date = '2021-01-02'
+start_date = '2020-01-01'
+end_date = '2021-06-18'
+
+
+def timer(func):
+    def wrap_func(*args, **kwargs):
+        t1 = time()
+        result = func(*args, **kwargs)
+        t2 = time()
+        print(f'Function {func.__name__!r} executed in {(t2-t1):.4f}s')
+        return result
+    return wrap_func
 
 
 def get_token():
@@ -137,4 +148,3 @@ def create_dataframe(data):     # data from get_location_metrics()
             pass
 
     return df
-
