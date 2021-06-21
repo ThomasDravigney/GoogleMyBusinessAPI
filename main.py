@@ -8,13 +8,19 @@
 from functions import get_location_metrics, save_local_data, get_local_data, clear_local_data, create_dataframe, timer
 
 
+metrics = ["QUERIES_DIRECT", "QUERIES_INDIRECT"]
+start_date = '2021-06-17'
+end_date = '2021-06-18'
+
+
 @timer
 def main():
     try:
         data = get_local_data()
-        print(data)
+        df = create_dataframe(data)
+        print(df)
     except (FileNotFoundError, UnboundLocalError):
-        save_local_data(get_location_metrics())
+        save_local_data(get_location_metrics(metrics, start_date, end_date))
         print('local_data file has been created. Rerun to get expected result.')
 
     # df.to_csv(r'C:\Users\dravi\Downloads\data gmb.csv', index=False)

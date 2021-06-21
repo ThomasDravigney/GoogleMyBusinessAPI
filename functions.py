@@ -9,8 +9,6 @@ from google.oauth2.credentials import Credentials
 
 
 account_id = '112578893942190553010'
-start_date = '2020-01-01'
-end_date = '2021-06-18'
 
 
 def timer(func):
@@ -73,7 +71,16 @@ def get_locations_list():
     return locations_list
 
 
-def get_location_metrics():
+def get_location_metrics(metrics, start_date, end_date):
+    metric_requests = []
+    for metric in metrics:
+        metric_requests.append({
+            "metric": metric,
+            "options": [
+                "AGGREGATED_DAILY"
+            ]
+        }, )
+
     res = []
     for location_id in get_locations_list():
         my_headers = {'Authorization': 'Bearer {0}'.format(get_token())}
@@ -82,14 +89,7 @@ def get_location_metrics():
                     "accounts/112578893942190553010/locations/" + location_id
                 ],
                 "basicRequest": {
-                    "metricRequests": [
-                        {
-                            "metric": "ALL",
-                            "options": [
-                                "AGGREGATED_DAILY"
-                            ]
-                        },
-                    ],
+                    "metricRequests": metric_requests,
                     "timeRange": {
                         "startTime": start_date + "T01:01:23.045123456Z",   # format : AAAA-MM-JJ
                         "endTime": end_date + "T23:59:59.045123456Z"        # format : AAAA-MM-JJ
