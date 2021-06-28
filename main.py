@@ -5,11 +5,11 @@
 # Google My Business, location metrics : https://developers.google.com/my-business/reference/rest/v4/Metric?hl=fr
 
 import pandas as pd
-from functions import get_location_metrics, save_local_data, get_local_data, clear_local_data, create_dataframe, timer
+from functions import get_location_metrics, save_local_data, get_local_data, clear_local_data, create_dataframe, timer, get_token
 
 
 metrics = ["ALL"]
-start_date = '2021-06-15'
+start_date = '2021-06-21'
 end_date = '2021-06-21'
 
 
@@ -17,11 +17,11 @@ end_date = '2021-06-21'
 def main():
     try:
         data = get_local_data()
-        df = create_dataframe(data)
+        #df = create_dataframe(data)
 
-        print(df)
+        print(data)
 
-        df.to_csv(r'C:\Users\dravi\Downloads\GMB_STATISTICS_{0}_{1}.csv'.format(start_date, end_date), index=False)
+        #df.to_csv(r'C:\Users\dravi\Downloads\GMB_STATISTICS_{0}_{1}.csv'.format(start_date, end_date), index=False)
 
     except (FileNotFoundError, UnboundLocalError):
         save_local_data(get_location_metrics(metrics, start_date, end_date))
