@@ -46,6 +46,7 @@ def get_token():
     return creds.token
 
 
+@timer
 def get_locations_list():
     locations_list = []
     page_token = None
@@ -71,38 +72,49 @@ def get_locations_list():
     return locations_list
 
 
-def get_location_metrics(metrics, start_date, end_date):
-    metric_requests = []
+@timer
+def get_locations_metrics(metrics, start_date, end_date):
+    locations_list = get_locations_list()
+
+    metrics_list = []
     for metric in metrics:
-        metric_requests.append({
+        metrics_list.append({
             "metric": metric,
             "options": [
                 "AGGREGATED_DAILY"
             ]
         }, )
 
-    res = []
-    for location_id in get_locations_list():
-        my_headers = {'Authorization': 'Bearer {0}'.format(get_token())}
-        my_json = {
-                "locationNames": [
-                    "accounts/112578893942190553010/locations/" + location_id
-                ],
+    my_headers = {'Authorization': 'Bearer {0}'.format(get_token())}
+    my_json = {
+                "locationNames": [],
                 "basicRequest": {
-                    "metricRequests": metric_requests,
+                    "metricRequests": metrics_list,
                     "timeRange": {
-                        "startTime": start_date + "T01:01:23.045123456Z",   # format : AAAA-MM-JJ
-                        "endTime": end_date + "T23:59:59.045123456Z"        # format : AAAA-MM-JJ
+                        "startTime": start_date + "T00:00:00Z",  # format : AAAA-MM-JJ
+                        "endTime": end_date + "T00:00:00Z"  # format : AAAA-MM-JJ
                     }
                 }
             }
 
-        response = requests.post(
-            'https://mybusiness.googleapis.com/v4/accounts/112578893942190553010/locations:reportInsights',
-            headers=my_headers,
-            json=my_json)
+    res = []
+    location_id_list = []
+    i = 0
+    for loc_id in locations_list:
+        location_id_list.append("accounts/" + account_id + "/locations/" + loc_id)
+        i += 1
 
-        res.append(response.json())
+        if i%10 == 0 or i == len(locations_list):
+            my_json['locationNames'] = location_id_list
+
+            response = requests.post('https://mybusiness.googleapis.com/v4/accounts/112578893942190553010/locations:reportInsights',
+                                     headers=my_headers,
+                                     json=my_json
+                                    )
+
+            res.append(response.json())
+
+            location_id_list = []
 
     return res
 
@@ -127,24 +139,26 @@ def clear_local_data():
         my_pickler.dump([])
 
 
-def create_dataframe(data):     # data from get_location_metrics()
+@timer
+def create_dataframe(data):  # data from get_location_metrics()
     df = pd.DataFrame(columns=['DATE', 'LOCATION_ID', 'METRIC', 'VALUE'])
 
     for location in data:
-        try:
-            location_id = location['locationMetrics'][0]['locationName'].split('/')[-1]
-            for metric in location['locationMetrics'][0]['metricValues']:
-                for date in metric['dimensionalValues']:
-                    try:
-                        row = {
-                            'DATE': date['timeDimension']['timeRange']['startTime'],
-                            'LOCATION_ID': location_id,
-                            'METRIC': metric['metric'],
-                            'VALUE': date['value']}
-                        df = df.append(row, ignore_index=True)
-                    except KeyError:
-                        pass
-        except KeyError:
-            pass
+        for i in range(len(location['locationMetrics'])):
+            try:
+                location_id = location['locationMetrics'][i]['locationName'].split('/')[-1]
+                for metric in location['locationMetrics'][i]['metricValues']:
+                    for date in metric['dimensionalValues']:
+                        try:
+                            row = {
+                                'DATE': date['timeDimension']['timeRange']['startTime'],
+                                'LOCATION_ID': location_id,
+                                'METRIC': metric['metric'],
+                                'VALUE': date['value']}
+                            df = df.append(row, ignore_index=True)
+                        except KeyError:
+                            pass
+            except KeyError:
+                pass
 
     return df
